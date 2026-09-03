@@ -6,6 +6,12 @@ import { SUBSCRIPTION_PLANS } from "../config/subscription.js";
 import PageLoader from "../components/PageLoader.jsx";
 import Spinner from "../components/Spinner.jsx";
 
+// Configure axios with base URL from environment variable
+const API_URL = import.meta.env.VITE_API_URL || '';
+const api = axios.create({
+  baseURL: API_URL,
+});
+
 const AdminUserDetail = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
@@ -35,7 +41,7 @@ const AdminUserDetail = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const response = await axios.get(`/api/admin/users/${userId}`, {
+      const response = await api.get(`/api/admin/users/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUserData(response.data);
@@ -53,7 +59,7 @@ const AdminUserDetail = () => {
     try {
       setActivating(true);
       const token = localStorage.getItem("token");
-      const response = await axios.post(
+      const response = await api.post(
         `/api/admin/users/${userId}/activate`,
         {
           plan: selectedPlan,

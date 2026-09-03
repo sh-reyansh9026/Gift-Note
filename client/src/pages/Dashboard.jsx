@@ -11,6 +11,12 @@ function Dashboard() {
   const { user, isAuthenticated, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
+  // Configure axios with base URL from environment variable
+  const API_URL = import.meta.env.VITE_API_URL || '';
+  const api = axios.create({
+    baseURL: API_URL,
+  });
+
   useEffect(() => {
     if (authLoading) {
       return;
@@ -27,7 +33,7 @@ function Dashboard() {
     try {
       setError(null);
       const token = localStorage.getItem("token");
-      const response = await axios.get("/api/giftmessages", {
+      const response = await api.get("/api/giftmessages", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setGiftMessages(response.data);
@@ -47,7 +53,7 @@ function Dashboard() {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`/api/giftmessages/${id}`, {
+      await api.delete(`/api/giftmessages/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       fetchGiftMessages();

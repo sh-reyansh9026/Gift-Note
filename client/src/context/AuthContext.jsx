@@ -1,6 +1,12 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 
+// Configure axios with base URL from environment variable
+const API_URL = import.meta.env.VITE_API_URL || '';
+const api = axios.create({
+  baseURL: API_URL,
+});
+
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -28,7 +34,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Set up axios interceptor for subscription expired errors
-    const interceptor = axios.interceptors.response.use(
+    const interceptor = api.interceptors.response.use(
       (response) => response,
       (error) => {
         if (error.response?.data?.error === "SUBSCRIPTION_EXPIRED") {
@@ -43,14 +49,14 @@ export const AuthProvider = ({ children }) => {
     );
 
     return () => {
-      axios.interceptors.response.eject(interceptor);
+      api.interceptors.response.eject(interceptor);
     };
   }, []);
 
   const fetchUser = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("/api/auth/me", {
+      const response = await api.get("/api/auth/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUser(response.data);
@@ -70,7 +76,7 @@ export const AuthProvider = ({ children }) => {
         return;
       }
       setSubscriptionLoading(true);
-      const response = await axios.get("/api/subscription/status", {
+      const response = await api.get("/api/subscription/status", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSubscriptionStatus(response.data);
@@ -84,7 +90,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post("/api/auth/login", { email, password });
+      const response = await api.post("/api/auth/login", { email, password });
       localStorage.setItem("token", response.data.token);
       setUser(response.data.seller);
       // Set subscription status to null initially so guard will fetch it
@@ -100,7 +106,7 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (businessName, email, password, instagramLink) => {
     try {
-      const response = await axios.post("/api/auth/signup", {
+      const response = await api.post("/api/auth/signup", {
         businessName,
         email,
         password,

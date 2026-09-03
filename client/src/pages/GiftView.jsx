@@ -4,6 +4,12 @@ import axios from "axios";
 import AudioPlayer from "../components/AudioPlayer";
 import Spinner from "../components/Spinner";
 
+// Configure axios with base URL from environment variable
+const API_URL = import.meta.env.VITE_API_URL || '';
+const api = axios.create({
+  baseURL: API_URL,
+});
+
 function GiftView() {
   const { slug } = useParams();
   const [gift, setGift] = useState(null);
@@ -23,7 +29,7 @@ function GiftView() {
 
   const fetchGift = async () => {
     try {
-      const response = await axios.get(`/api/giftmessages/${slug}`);
+      const response = await api.get(`/api/giftmessages/${slug}`);
       setGift(response.data);
     } catch (error) {
       setError("Gift message not found");

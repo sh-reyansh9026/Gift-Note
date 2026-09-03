@@ -12,6 +12,12 @@ const AdminUsers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState("");
 
+  // Configure axios with base URL from environment variable
+  const API_URL = import.meta.env.VITE_API_URL || '';
+  const api = axios.create({
+    baseURL: API_URL,
+  });
+
   useEffect(() => {
     // Redirect if not admin
     if (!isAdmin) {
@@ -25,7 +31,7 @@ const AdminUsers = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const response = await axios.get("/api/admin/users", {
+      const response = await api.get("/api/admin/users", {
         headers: { Authorization: `Bearer ${token}` },
         params: searchTerm ? { search: searchTerm } : {},
       });

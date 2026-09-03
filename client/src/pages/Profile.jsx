@@ -5,6 +5,12 @@ import { useAuth } from "../context/AuthContext.jsx";
 import ButtonLoading from "../components/ButtonLoading.jsx";
 import Skeleton from "../components/Skeleton.jsx";
 
+// Configure axios with base URL from environment variable
+const API_URL = import.meta.env.VITE_API_URL || '';
+const api = axios.create({
+  baseURL: API_URL,
+});
+
 const EMPTY_PROFILE = {
   _id: "",
   name: "",
@@ -93,7 +99,7 @@ function Profile() {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const response = await axios.get("/api/seller/profile", {
+      const response = await api.get("/api/seller/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -128,7 +134,7 @@ function Profile() {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.put("/api/seller/profile", form, {
+      const response = await api.put("/api/seller/profile", form, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -170,7 +176,7 @@ function Profile() {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.put("/api/seller/profile/logo", formData, {
+      const response = await api.put("/api/seller/profile/logo", formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
@@ -198,7 +204,7 @@ function Profile() {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.put("/api/seller/password", passwordForm, {
+      await api.put("/api/seller/password", passwordForm, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPasswordForm({

@@ -5,6 +5,12 @@ import axios from "axios";
 import ButtonLoading from "../components/ButtonLoading";
 import Spinner from "../components/Spinner";
 
+// Configure axios with base URL from environment variable
+const API_URL = import.meta.env.VITE_API_URL || '';
+const api = axios.create({
+  baseURL: API_URL,
+});
+
 function CreateGift() {
   const [recipientName, setRecipientName] = useState("");
   const [senderName, setSenderName] = useState("");
@@ -142,7 +148,7 @@ function CreateGift() {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.post("/api/giftmessages", formData, {
+      const response = await api.post("/api/giftmessages", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
