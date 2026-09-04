@@ -5,15 +5,15 @@ export const SUBSCRIPTION_PLANS = [
     id: '1_month',
     name: '1 Month',
     duration: '1 month',
-    price: 299, // UPDATE: Set your actual price
+    price: 399, // UPDATE: Set your actual price
     description: 'Perfect for trying out our service'
   },
   {
     id: '3_months',
     name: '3 Months',
     duration: '3 months',
-    price: 799, // UPDATE: Set your actual price
-    description: 'Save more than 10% with quarterly billing'
+    price: 999, // UPDATE: Set your actual price
+    description: 'Save more than 15% with quarterly billing'
   },
   // {
   //   id: '1_year',
