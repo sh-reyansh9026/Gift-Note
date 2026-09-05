@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import dns from "node:dns/promises";
 import nodemailer from "nodemailer";
 import Seller from "../models/Seller.js";
 import SignupOtp from "../models/SignupOtp.js";
@@ -10,20 +11,26 @@ import passport from "../config/passport.js";
 
 const router = express.Router();
 
-const getMailer = () =>
-  nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
+const getMailer = async () => {
+  const smtpHost = process.env.SMTP_HOST;
+  const { address: smtpIpv4 } = await dns.lookup(smtpHost, { family: 4 });
+
+  return nodemailer.createTransport({
+    host: smtpIpv4,
     port: Number(process.env.SMTP_PORT || 587),
     secure: process.env.SMTP_SECURE === "true",
-    family: 4,
     connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 10000,
+    tls: {
+      servername: smtpHost,
+    },
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
   });
+};
 
 const hashOtp = (otp) => crypto.createHash("sha256").update(otp).digest("hex");
 
@@ -86,7 +93,8 @@ router.post("/signup", async (req, res) => {
     });
 
     try {
-      await getMailer().sendMail({
+      const mailer = await getMailer();
+      await mailer.sendMail({
         from: process.env.SMTP_FROM?.includes("@")
           ? process.env.SMTP_FROM
           : process.env.SMTP_USER,
