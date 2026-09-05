@@ -42,7 +42,7 @@ app.use(
   cors({
     origin: process.env.FRONTEND_URL,
     credentials: true,
-  })
+  }),
 );
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -68,6 +68,21 @@ app.get("/api/health", (req, res) => {
 // app.listen(PORT, () => {
 //   console.log(`Server running on port ${PORT}`);
 // });
+
+app.get("/", (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta name="google-site-verification" content="l8hBNbD330EemDIerJFTYy89mV21qfzOA1nHLRrCiDM" />
+        <title>GiftNote API</title>
+      </head>
+      <body>
+        GiftNote API
+      </body>
+    </html>
+  `);
+});
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
