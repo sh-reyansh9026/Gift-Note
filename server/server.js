@@ -60,6 +60,22 @@ app.use("/api/giftmessages", giftMessageRoutes);
 app.use("/api/subscription", subscriptionRoutes);
 app.use("/api/admin", adminRoutes);
 
+// Root page used for Google Search Console verification.
+app.get("/", (req, res) => {
+  const verificationCode = process.env.GOOGLE_SITE_VERIFICATION;
+
+  res.send(`
+    <!doctype html>
+    <html lang="en">
+      <head>
+        <meta name="google-site-verification" content="l8hBNbD330EemDIerJFTYy89mV21qfzOA1nHLRrCiDM" />
+        <title>GiftNote API</title>
+      </head>
+      <body></body>
+    </html>
+  `);
+});
+
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
