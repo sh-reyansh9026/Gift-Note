@@ -95,27 +95,24 @@ Edit the `.env` file with your configuration:
 ```env
 MONGO_URI=mongodb://localhost:27017/giftnote
 # Or use MongoDB Atlas: mongodb+srv://<username>:<password>@cluster.mongodb.net/giftnote
-JWT_SECRET=your_jwt_secret_key_here_change_this_in_production
 PORT=5000
 FRONTEND_URL=http://localhost:5173
 
-# Signup email OTP (SMTP)
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your_smtp_username
-SMTP_PASS=your_smtp_password
-SMTP_FROM=GiftNote <no-reply@example.com>
+# Clerk authentication
+CLERK_SECRET_KEY=sk_test_your_clerk_secret_key
 
 # Cloudinary Configuration
 CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 
-# Google OAuth Configuration
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_CALLBACK_URL=http://localhost:5000/api/auth/google/callback
+```
+
+For the client, create `client/.env` with:
+
+```env
+VITE_API_URL=http://localhost:5000
+VITE_CLERK_PUBLISHABLE_KEY=pk_test_your_clerk_publishable_key
 ```
 
 #### Getting Cloudinary Credentials

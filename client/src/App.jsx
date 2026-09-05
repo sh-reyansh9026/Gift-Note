@@ -10,7 +10,6 @@ import Signup from "./pages/Signup.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import CreateGift from "./pages/CreateGift.jsx";
 import GiftView from "./pages/GiftView.jsx";
-import OAuthSuccess from "./pages/OAuthSuccess.jsx";
 import SubscriptionRequired from "./pages/SubscriptionRequired.jsx";
 import Profile from "./pages/Profile.jsx";
 import AdminUsers from "./pages/AdminUsers.jsx";
@@ -37,9 +36,8 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/oauth-success" element={<OAuthSuccess />} />
+          <Route path="/login/*" element={<Login />} />
+          <Route path="/signup/*" element={<Signup />} />
           <Route
             path="/subscription-required"
             element={<SubscriptionRequired />}

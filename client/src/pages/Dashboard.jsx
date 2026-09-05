@@ -8,11 +8,17 @@ function Dashboard() {
   const [giftMessages, setGiftMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { user, isAuthenticated, isAdmin, loading: authLoading } = useAuth();
+  const {
+    user,
+    isAuthenticated,
+    isAdmin,
+    loading: authLoading,
+    getAuthHeaders,
+  } = useAuth();
   const navigate = useNavigate();
 
   // Configure axios with base URL from environment variable
-  const API_URL = import.meta.env.VITE_API_URL || '';
+  const API_URL = import.meta.env.VITE_API_URL || "";
   const api = axios.create({
     baseURL: API_URL,
   });
@@ -32,9 +38,8 @@ function Dashboard() {
   const fetchGiftMessages = async () => {
     try {
       setError(null);
-      const token = localStorage.getItem("token");
       const response = await api.get("/api/giftmessages", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: await getAuthHeaders(),
       });
       setGiftMessages(response.data);
     } catch (error) {
@@ -52,9 +57,8 @@ function Dashboard() {
       return;
 
     try {
-      const token = localStorage.getItem("token");
       await api.delete(`/api/giftmessages/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: await getAuthHeaders(),
       });
       fetchGiftMessages();
     } catch (error) {

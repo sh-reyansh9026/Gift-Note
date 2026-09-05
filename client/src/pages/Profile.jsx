@@ -6,7 +6,7 @@ import ButtonLoading from "../components/ButtonLoading.jsx";
 import Skeleton from "../components/Skeleton.jsx";
 
 // Configure axios with base URL from environment variable
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_URL = import.meta.env.VITE_API_URL || "";
 const api = axios.create({
   baseURL: API_URL,
 });
@@ -64,7 +64,8 @@ function getStatusStyles(status) {
 
 function Profile() {
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout, updateUser } = useAuth();
+  const { user, isAuthenticated, logout, updateUser, getAuthHeaders } =
+    useAuth();
   const [profile, setProfile] = useState(EMPTY_PROFILE);
   const [form, setForm] = useState({
     name: "",
@@ -98,9 +99,8 @@ function Profile() {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
       const response = await api.get("/api/seller/profile", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: await getAuthHeaders(),
       });
 
       const nextProfile = response.data;
@@ -133,9 +133,8 @@ function Profile() {
     setSaving(true);
 
     try {
-      const token = localStorage.getItem("token");
       const response = await api.put("/api/seller/profile", form, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: await getAuthHeaders(),
       });
 
       setProfile((prev) => ({
@@ -175,10 +174,9 @@ function Profile() {
     setErrorMessage("");
 
     try {
-      const token = localStorage.getItem("token");
       const response = await api.put("/api/seller/profile/logo", formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          ...(await getAuthHeaders()),
           "Content-Type": "multipart/form-data",
         },
       });
@@ -203,9 +201,8 @@ function Profile() {
     setPasswordLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
       await api.put("/api/seller/password", passwordForm, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: await getAuthHeaders(),
       });
       setPasswordForm({
         currentPassword: "",

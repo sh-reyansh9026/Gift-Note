@@ -7,7 +7,7 @@ import PageLoader from "../components/PageLoader.jsx";
 import Spinner from "../components/Spinner.jsx";
 
 // Configure axios with base URL from environment variable
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_URL = import.meta.env.VITE_API_URL || "";
 const api = axios.create({
   baseURL: API_URL,
 });
@@ -15,7 +15,7 @@ const api = axios.create({
 const AdminUserDetail = () => {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const { isAdmin, getAuthHeaders } = useAuth();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -40,9 +40,8 @@ const AdminUserDetail = () => {
   const fetchUserDetails = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
       const response = await api.get(`/api/admin/users/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: await getAuthHeaders(),
       });
       setUserData(response.data);
       setError("");
@@ -58,7 +57,6 @@ const AdminUserDetail = () => {
     e.preventDefault();
     try {
       setActivating(true);
-      const token = localStorage.getItem("token");
       const response = await api.post(
         `/api/admin/users/${userId}/activate`,
         {
@@ -67,7 +65,7 @@ const AdminUserDetail = () => {
           notes,
         },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: await getAuthHeaders(),
         },
       );
 

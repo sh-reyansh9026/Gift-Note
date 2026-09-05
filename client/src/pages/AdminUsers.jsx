@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import PageLoader from "../components/PageLoader.jsx";
 
 const AdminUsers = () => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, getAuthHeaders } = useAuth();
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,7 +13,7 @@ const AdminUsers = () => {
   const [error, setError] = useState("");
 
   // Configure axios with base URL from environment variable
-  const API_URL = import.meta.env.VITE_API_URL || '';
+  const API_URL = import.meta.env.VITE_API_URL || "";
   const api = axios.create({
     baseURL: API_URL,
   });
@@ -30,9 +30,8 @@ const AdminUsers = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
       const response = await api.get("/api/admin/users", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: await getAuthHeaders(),
         params: searchTerm ? { search: searchTerm } : {},
       });
       setUsers(response.data);

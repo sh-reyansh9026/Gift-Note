@@ -2,40 +2,19 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
-import session from "express-session";
-import passport from "./config/passport.js";
+import { clerkMiddleware } from "@clerk/express";
 import authRoutes from "./routes/auth.js";
 import sellerRoutes from "./routes/seller.js";
 import giftMessageRoutes from "./routes/giftMessages.js";
 import subscriptionRoutes from "./routes/subscription.js";
 import adminRoutes from "./routes/admin.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Session middleware (required for Passport)
-app.use(
-  session({
-    secret: process.env.JWT_SECRET || "your-session-secret",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-    },
-  }),
-);
-
-// Initialize Passport
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(clerkMiddleware());
 
 // Middleware
 app.use(

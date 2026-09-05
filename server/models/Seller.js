@@ -41,8 +41,13 @@ const sellerSchema = new mongoose.Schema(
     },
     oauthProvider: {
       type: String,
-      enum: ["google", null],
+      enum: ["google", "clerk", null],
       default: null,
+    },
+    clerkId: {
+      type: String,
+      sparse: true,
+      unique: true,
     },
     googleId: {
       type: String,

@@ -1,84 +1,69 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import { useAuth as useClerkAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 
-// Configure axios with base URL from environment variable
 const API_URL = import.meta.env.VITE_API_URL || "";
-const api = axios.create({
-  baseURL: API_URL,
-  timeout: 15000,
-});
-
+const api = axios.create({ baseURL: API_URL, timeout: 15000 });
 const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used within an AuthProvider");
   return context;
 };
 
 export const AuthProvider = ({ children }) => {
+  const { isLoaded, isSignedIn, getToken, signOut } = useClerkAuth();
+  const { user: clerkUser } = useUser();
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const [subscriptionLoading, setSubscriptionLoading] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      fetchUser();
-    } else {
-      setLoading(false);
+  const getAuthHeaders = async () => {
+    const token = await getToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
+  const fetchUser = async () => {
+    try {
+      const response = await api.get("/api/auth/me", {
+        headers: await getAuthHeaders(),
+      });
+      setUser(response.data);
+    } catch {
+      setUser(null);
     }
-  }, []);
+  };
 
   useEffect(() => {
-    // Set up axios interceptor for subscription expired errors
+    if (!isLoaded) return;
+    if (isSignedIn) fetchUser();
+    else setUser(null);
+  }, [isLoaded, isSignedIn, clerkUser?.id]);
+
+  useEffect(() => {
     const interceptor = api.interceptors.response.use(
       (response) => response,
       (error) => {
         if (error.response?.data?.error === "SUBSCRIPTION_EXPIRED") {
-          // Clear auth and redirect to subscription required
-          localStorage.removeItem("token");
-          setUser(null);
           setSubscriptionStatus(null);
           window.location.href = "/subscription-required";
         }
         return Promise.reject(error);
       },
     );
-
-    return () => {
-      api.interceptors.response.eject(interceptor);
-    };
+    return () => api.interceptors.response.eject(interceptor);
   }, []);
 
-  const fetchUser = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await api.get("/api/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUser(response.data);
-    } catch (error) {
-      localStorage.removeItem("token");
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const fetchSubscriptionStatus = async () => {
+    if (!isSignedIn) {
+      setSubscriptionStatus(null);
+      return;
+    }
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setSubscriptionStatus(null);
-        return;
-      }
       setSubscriptionLoading(true);
       const response = await api.get("/api/subscription/status", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: await getAuthHeaders(),
       });
       setSubscriptionStatus(response.data);
     } catch (error) {
@@ -89,91 +74,34 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (email, password) => {
-    try {
-      const response = await api.post("/api/auth/login", { email, password });
-      localStorage.setItem("token", response.data.token);
-      setUser(response.data.seller);
-      // Set subscription status to null initially so guard will fetch it
-      setSubscriptionStatus(null);
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.message || "Login failed",
-      };
-    }
-  };
-
-  const signup = async (businessName, email, password, instagramLink) => {
-    try {
-      await api.post("/api/auth/signup", {
-        businessName,
-        email,
-        password,
-        instagramLink,
-      });
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.message || "Signup failed",
-      };
-    }
-  };
-
-  const verifySignup = async (email, otp) => {
-    try {
-      const response = await api.post("/api/auth/verify-signup", {
-        email,
-        otp,
-      });
-      localStorage.setItem("token", response.data.token);
-      setUser(response.data.seller);
-      // Set subscription status to null initially so guard will fetch it
-      setSubscriptionStatus(null);
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.message || "Signup failed",
-      };
-    }
-  };
-
   const logout = () => {
-    localStorage.removeItem("token");
     setUser(null);
     setSubscriptionStatus(null);
-  };
-
-  const loginWithToken = async () => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      await fetchUser();
-      await fetchSubscriptionStatus();
-    }
+    signOut();
   };
 
   const updateUser = (updatedUser) => {
     setUser((currentUser) => ({ ...currentUser, ...updatedUser }));
   };
 
-  const value = {
-    user,
-    loading,
-    subscriptionStatus,
-    subscriptionLoading,
-    fetchSubscriptionStatus,
-    login,
-    signup,
-    verifySignup,
-    logout,
-    updateUser,
-    loginWithToken,
-    isAuthenticated: !!user,
-    isAdmin: user?.isAdmin || false,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        loading: !isLoaded || (isSignedIn && !user),
+        subscriptionStatus,
+        subscriptionLoading,
+        fetchSubscriptionStatus,
+        getAuthHeaders,
+        logout,
+        updateUser,
+        isAuthenticated: Boolean(isSignedIn && user),
+        isAdmin: user?.isAdmin || false,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
+
+export { api };

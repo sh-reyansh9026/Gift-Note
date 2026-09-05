@@ -6,7 +6,7 @@ import ButtonLoading from "../components/ButtonLoading";
 import Spinner from "../components/Spinner";
 
 // Configure axios with base URL from environment variable
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_URL = import.meta.env.VITE_API_URL || "";
 const api = axios.create({
   baseURL: API_URL,
 });
@@ -29,7 +29,7 @@ function CreateGift() {
   const [error, setError] = useState("");
   const [qrCode, setQrCode] = useState(null);
   const [isQrLoading, setIsQrLoading] = useState(false);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, getAuthHeaders } = useAuth();
   const navigate = useNavigate();
 
   const mediaRecorderRef = useRef(null);
@@ -147,11 +147,10 @@ function CreateGift() {
     if (audio) formData.append("audio", audio);
 
     try {
-      const token = localStorage.getItem("token");
       const response = await api.post("/api/giftmessages", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
+          ...(await getAuthHeaders()),
         },
         onUploadProgress: (progressEvent) => {
           const progress = Math.round(
