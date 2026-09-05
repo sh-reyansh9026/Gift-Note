@@ -15,6 +15,9 @@ const getMailer = () =>
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT || 587),
     secure: process.env.SMTP_SECURE === "true",
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
@@ -44,12 +47,10 @@ router.post("/signup", async (req, res) => {
       !password ||
       password.length < 6
     ) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Business name, valid email, and a password of at least 6 characters are required",
-        });
+      return res.status(400).json({
+        message:
+          "Business name, valid email, and a password of at least 6 characters are required",
+      });
     }
 
     const existingSeller = await Seller.findOne({ email: normalizedEmail });
@@ -73,7 +74,9 @@ router.post("/signup", async (req, res) => {
     });
 
     await getMailer().sendMail({
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      from: process.env.SMTP_FROM?.includes("@")
+        ? process.env.SMTP_FROM
+        : process.env.SMTP_USER,
       to: normalizedEmail,
       subject: "Your GiftNote verification code",
       text: `Your GiftNote verification code is ${otp}. It expires in 10 minutes.`,
