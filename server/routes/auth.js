@@ -26,6 +26,11 @@ const getMailer = () =>
 
 const hashOtp = (otp) => crypto.createHash("sha256").update(otp).digest("hex");
 
+const smtpConfigured = () =>
+  Boolean(
+    process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS,
+  );
+
 const sellerResponse = (seller) => ({
   id: seller._id,
   businessName: seller.businessName,
@@ -60,6 +65,12 @@ router.post("/signup", async (req, res) => {
         .json({ message: "Seller with this email already exists" });
     }
 
+    if (!smtpConfigured()) {
+      return res.status(503).json({
+        message: "Email service is not configured on the server",
+      });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = crypto.randomInt(100000, 1000000).toString();
 
@@ -73,15 +84,23 @@ router.post("/signup", async (req, res) => {
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     });
 
-    await getMailer().sendMail({
-      from: process.env.SMTP_FROM?.includes("@")
-        ? process.env.SMTP_FROM
-        : process.env.SMTP_USER,
-      to: normalizedEmail,
-      subject: "Your GiftNote verification code",
-      text: `Your GiftNote verification code is ${otp}. It expires in 10 minutes.`,
-      html: `<p>Your GiftNote verification code is:</p><h2>${otp}</h2><p>This code expires in 10 minutes.</p>`,
-    });
+    try {
+      await getMailer().sendMail({
+        from: process.env.SMTP_FROM?.includes("@")
+          ? process.env.SMTP_FROM
+          : process.env.SMTP_USER,
+        to: normalizedEmail,
+        subject: "Your GiftNote verification code",
+        text: `Your GiftNote verification code is ${otp}. It expires in 10 minutes.`,
+        html: `<p>Your GiftNote verification code is:</p><h2>${otp}</h2><p>This code expires in 10 minutes.</p>`,
+      });
+    } catch (mailError) {
+      await SignupOtp.deleteMany({ email: normalizedEmail });
+      console.error("Signup OTP email error:", mailError);
+      return res.status(503).json({
+        message: "Email service could not send the verification code",
+      });
+    }
 
     return res
       .status(200)
