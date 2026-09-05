@@ -62,8 +62,6 @@ app.use("/api/admin", adminRoutes);
 
 // Root page used for Google Search Console verification.
 app.get("/", (req, res) => {
-  const verificationCode = process.env.GOOGLE_SITE_VERIFICATION;
-
   res.send(`
     <!doctype html>
     <html lang="en">

@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 
 // Configure axios with base URL from environment variable
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_URL = import.meta.env.VITE_API_URL || "";
 const api = axios.create({
   baseURL: API_URL,
 });
@@ -106,11 +106,26 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (businessName, email, password, instagramLink) => {
     try {
-      const response = await api.post("/api/auth/signup", {
+      await api.post("/api/auth/signup", {
         businessName,
         email,
         password,
         instagramLink,
+      });
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || "Signup failed",
+      };
+    }
+  };
+
+  const verifySignup = async (email, otp) => {
+    try {
+      const response = await api.post("/api/auth/verify-signup", {
+        email,
+        otp,
       });
       localStorage.setItem("token", response.data.token);
       setUser(response.data.seller);
@@ -151,6 +166,7 @@ export const AuthProvider = ({ children }) => {
     fetchSubscriptionStatus,
     login,
     signup,
+    verifySignup,
     logout,
     updateUser,
     loginWithToken,

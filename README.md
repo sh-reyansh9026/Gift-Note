@@ -99,6 +99,14 @@ JWT_SECRET=your_jwt_secret_key_here_change_this_in_production
 PORT=5000
 FRONTEND_URL=http://localhost:5173
 
+# Signup email OTP (SMTP)
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_smtp_username
+SMTP_PASS=your_smtp_password
+SMTP_FROM=GiftNote <no-reply@example.com>
+
 # Cloudinary Configuration
 CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
@@ -250,6 +258,7 @@ The frontend will run on `http://localhost:5173`
 ### File Uploads
 
 Files are uploaded directly to Cloudinary cloud storage:
+
 - Photos are stored in: `giftnote/{sellerId}/photos/`
 - Audio files are stored in: `giftnote/{sellerId}/audio/`
 
@@ -273,7 +282,7 @@ The application includes a manual subscription system with automatic expiry enfo
 - **3 Months**: ₹799 (Save 10%)
 - **1 Year**: ₹2499 (Save 30%)
 
-*Note: Plan prices and contact information can be customized in `client/src/config/subscription.js`*
+_Note: Plan prices and contact information can be customized in `client/src/config/subscription.js`_
 
 ### How It Works
 
@@ -301,7 +310,7 @@ Since there's no self-serve admin signup, you need to manually set a user as adm
 ### Subscription Status Logic
 
 - **Active**: User has a subscription with endDate > current date
-- **Expired**: User has a subscription but endDate <= current date  
+- **Expired**: User has a subscription but endDate <= current date
 - **None**: User has no subscription record
 
 The subscription status is always calculated server-side based on the endDate - no stored "active" flag is trusted.
@@ -314,6 +323,7 @@ The system intelligently calculates new end dates:
 - **Expired renewal**: If subscription is expired or doesn't exist, starts from today
 
 Example:
+
 - Existing endDate Sept 25, paid Sept 10, 1 month plan → new endDate Oct 25
 - Existing endDate Aug 25, paid Sept 10, 1 month plan → new endDate Oct 10
 
