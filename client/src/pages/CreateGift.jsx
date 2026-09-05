@@ -410,18 +410,18 @@ function CreateGift() {
 
                 {/* Audio Mode Toggle */}
                 <div className="flex gap-2 mb-3">
-                  <button
+                  {/* <button
                     type="button"
                     onClick={() => setAudioMode("upload")}
-                    className={`flex-1 py-2 px-4 rounded-lg font-medium transition ${
+                    className={`flex-2 align-middle py-2 px-4 rounded-lg font-medium transition ${
                       audioMode === "upload"
                         ? "bg-black text-white"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     }`}
                   >
                     Upload File
-                  </button>
-                  <button
+                  </button> */}
+                  {/* <button
                     type="button"
                     onClick={() => setAudioMode("record")}
                     className={`flex-1 py-2 px-4 rounded-lg font-medium transition ${
@@ -431,7 +431,7 @@ function CreateGift() {
                     }`}
                   >
                     Record
-                  </button>
+                  </button> */}
                 </div>
 
                 {audioMode === "upload" ? (

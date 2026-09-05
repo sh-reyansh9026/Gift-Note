@@ -6,6 +6,7 @@ import Skeleton from "../components/Skeleton.jsx";
 
 function Dashboard() {
   const [giftMessages, setGiftMessages] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const {
@@ -16,6 +17,18 @@ function Dashboard() {
     getAuthHeaders,
   } = useAuth();
   const navigate = useNavigate();
+  const pageSize = 2;
+  const totalPages = Math.max(1, Math.ceil(giftMessages.length / pageSize));
+  const visibleGiftMessages = giftMessages.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   // Configure axios with base URL from environment variable
   const API_URL = import.meta.env.VITE_API_URL || "";
@@ -268,7 +281,7 @@ function Dashboard() {
           </div>
         ) : (
           <div className="grid gap-6 xl:grid-cols-[1fr_1fr_320px]">
-            {giftMessages.slice(0, 2).map((gift) => (
+            {visibleGiftMessages.map((gift) => (
               <div
                 key={gift._id}
                 className="overflow-hidden rounded-[1.5rem] border border-[#e8e2df] bg-[#f7f5f5] shadow-[0_6px_18px_rgba(24,26,32,0.04)]"
@@ -367,6 +380,30 @@ function Dashboard() {
                 Design a new custom gift message for someone special.
               </p>
             </button>
+
+            {totalPages > 1 && (
+              <div className="col-span-full flex items-center justify-center gap-4 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((page) => page - 1)}
+                  disabled={currentPage === 1}
+                  className="rounded-lg border border-[#d9d1cf] bg-white px-4 py-2 text-sm font-medium text-[#1b2135] transition hover:bg-[#f0efee] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Previous
+                </button>
+                <span className="text-sm text-[#4d4d4d]" aria-live="polite">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((page) => page + 1)}
+                  disabled={currentPage === totalPages}
+                  className="rounded-lg border border-[#d9d1cf] bg-white px-4 py-2 text-sm font-medium text-[#1b2135] transition hover:bg-[#f0efee] disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </div>
         )}
       </main>
